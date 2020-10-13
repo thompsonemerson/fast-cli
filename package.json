@@ -1,60 +1,60 @@
 {
-  "name": "fast-cli",
-  "version": "0.2.1",
-  "description": "Test your download speed using fast.com",
-  "license": "MIT",
-  "repository": "sindresorhus/fast-cli",
-  "author": {
-    "name": "Sindre Sorhus",
-    "email": "sindresorhus@gmail.com",
-    "url": "sindresorhus.com"
-  },
-  "bin": {
-    "fast": "cli.js"
-  },
-  "engines": {
-    "node": ">=4"
-  },
-  "scripts": {
-    "test": "xo && ava"
-  },
-  "files": [
-    "cli.js",
-    "api.js"
-  ],
-  "keywords": [
-    "cli-app",
-    "cli",
-    "speed",
-    "test",
-    "fast",
-    "tester",
-    "down",
-    "download",
-    "speed-test",
-    "speedtest",
-    "connection",
-    "internet",
-    "bandwidth",
-    "measure",
-    "check",
-    "mbps"
-  ],
-  "dependencies": {
-    "chalk": "^1.1.0",
-    "log-update": "^1.0.0",
-    "meow": "^3.3.0",
-    "ora": "^0.3.0",
-    "phantomjs-prebuilt": "^2.1.7",
-    "promise-phantom": "^3.1.1",
-    "zen-observable": "^0.3.0"
-  },
-  "devDependencies": {
-    "ava": "*",
-    "execa": "^0.4.0",
-    "xo": "*"
-  },
-  "xo": {
-    "esnext": true
-  }
+	"name": "fast-cli",
+	"version": "2.4.0",
+	"description": "Test your download and upload speed using fast.com",
+	"license": "MIT",
+	"repository": "sindresorhus/fast-cli",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "sindresorhus.com"
+	},
+	"bin": {
+		"fast": "cli.js"
+	},
+	"engines": {
+		"node": ">=8"
+	},
+	"scripts": {
+		"test": "xo && ava"
+	},
+	"files": [
+		"cli.js",
+		"api.js"
+	],
+	"keywords": [
+		"cli-app",
+		"cli",
+		"speed",
+		"test",
+		"fast",
+		"tester",
+		"down",
+		"download",
+		"upload",
+		"up",
+		"speed-test",
+		"speedtest",
+		"connection",
+		"internet",
+		"bandwidth",
+		"measure",
+		"check",
+		"mbps"
+	],
+	"dependencies": {
+		"chalk": "^2.4.2",
+		"deep-equal": "^1.0.1",
+		"delay": "^4.1.0",
+		"log-update": "^2.3.0",
+		"meow": "^5.0.0",
+		"ora": "^3.1.0",
+		"puppeteer": "^1.12.1",
+		"zen-observable": "^0.8.13"
+	},
+	"devDependencies": {
+		"ava": "^1.2.1",
+		"execa": "^1.0.0",
+		"xo": "^0.24.0"
+	}
 }

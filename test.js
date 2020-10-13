@@ -3,10 +3,10 @@ import execa from 'execa';
 import test from 'ava';
 
 test.cb('default', t => {
-	// TODO: use `execa` here when the `spawn` API is done
+	// TODO: Use `execa` here when the `spawn` API is done
 	const cp = childProcess.spawn('./cli.js', {stdio: 'inherit'});
 
-	cp.on('error', t.ifError);
+	cp.on('error', t.fail);
 
 	cp.on('close', code => {
 		t.is(code, 0);
@@ -15,5 +15,5 @@ test.cb('default', t => {
 });
 
 test('non-tty', async t => {
-	t.regex(await execa.stdout('./cli.js'), /\d+ \w/i);
+	t.regex(await execa.stdout('./cli.js'), /^\d+(?:\.\d+)? \w+$/i);
 });

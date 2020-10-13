@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 'use strict';
-/* eslint-disable prefer-template */
 const dns = require('dns');
 const meow = require('meow');
 const chalk = require('chalk');
@@ -8,16 +7,39 @@ const logUpdate = require('log-update');
 const ora = require('ora');
 const api = require('./api');
 
-meow(`
+const cli = meow(`
 	Usage
 	  $ fast
 	  $ fast > file
-`);
 
-// check connection
-dns.lookup('fast.com', err => {
-	if (err && err.code === 'ENOTFOUND') {
-		console.error(chalk.red('\n Please check your internet connection.\n'));
+	Options
+	  --upload, -u   Measure upload speed in addition to download speed
+	  --single-line  Reduce spacing and output to a single line
+
+	Examples
+	  $ fast --upload > file && cat file
+	  17 Mbps
+	  4.4 Mbps
+`, {
+	flags: {
+		upload: {
+			type: 'boolean',
+			alias: 'u'
+		},
+		singleLine: {
+			type: 'boolean'
+		}
+	}
+});
+
+// Check connections
+dns.lookup('fast.com', error => {
+	if (error && error.code === 'ENOTFOUND') {
+		console.error(
+			chalk.red(
+				`${lineBreak(1)}${spacing(1)}Please check your internet connection.${lineBreak(1)}`
+			)
+		);
 		process.exit(1);
 	}
 });
@@ -25,20 +47,50 @@ dns.lookup('fast.com', err => {
 let data = {};
 const spinner = ora();
 
-const speed = () => chalk[data.isDone ? 'green' : 'cyan'](data.speed + ' ' + chalk.dim(data.unit)) + '\n\n';
+const lineBreak = amount => (cli.flags.singleLine ? '' : '\n'.repeat(amount));
+const spacing = amount => (cli.flags.singleLine ? '' : ' '.repeat(amount));
+
+const downloadSpeed = () =>
+	`${data.downloadSpeed} ${chalk.dim(data.downloadUnit)} ↓`;
+
+const uploadSpeed = () =>
+	data.uploadSpeed ?
+		`${data.uploadSpeed} ${chalk.dim(data.uploadUnit)} ↑` :
+		chalk.dim('- Mbps ↑');
+
+const uploadColor = string => (data.isDone ? chalk.green(string) : chalk.cyan(string));
+
+const downloadColor = string => ((data.isDone || data.uploadSpeed) ? chalk.green(string) : chalk.cyan(string));
+
+const speedText = () =>
+	cli.flags.upload ?
+		`${downloadColor(downloadSpeed())} ${chalk.dim('/')} ${uploadColor(uploadSpeed())}` :
+		downloadColor(downloadSpeed());
+
+const speed = () => speedText() + lineBreak(2);
 
 function exit() {
-	const output = process.stdout.isTTY ? `\n\n    ${speed()}` : `${data.speed} ${data.unit}`;
-	logUpdate(output);
+	if (process.stdout.isTTY) {
+		logUpdate(`${lineBreak(2)}${spacing(4)}${speed()}`);
+	} else {
+		let output = `${data.downloadSpeed} ${data.downloadUnit}`;
+
+		if (cli.flags.upload) {
+			output += `\n${data.uploadSpeed} ${data.uploadUnit}`;
+		}
+
+		console.log(output);
+	}
+
 	process.exit();
 }
 
 if (process.stdout.isTTY) {
 	setInterval(() => {
-		const pre = '\n\n  ' + chalk.gray.dim(spinner.frame());
+		const pre = lineBreak(2) + spacing(2) + chalk.gray.dim(spinner.frame());
 
-		if (!data.speed) {
-			logUpdate(pre + '\n');
+		if (!data.downloadSpeed) {
+			logUpdate(pre + lineBreak(2));
 			return;
 		}
 
@@ -46,25 +98,15 @@ if (process.stdout.isTTY) {
 	}, 50);
 }
 
-let timeout;
+(async () => {
+	try {
+		await api({measureUpload: cli.flags.upload}).forEach(result => {
+			data = result;
+		});
 
-api()
-	.forEach(result => {
-		data = result;
-		// exit after the speed has been the same for 3 sec
-		// needed as sometimes `isDone` doesn't work for some reason
-		clearTimeout(timeout);
-		timeout = setTimeout(() => {
-			data.isDone = true;
-			exit();
-		}, 5000);
-
-		if (data.isDone) {
-			exit();
-		}
-	})
-	.then(() => exit())
-	.catch(err => {
-		console.error(err.message);
+		exit();
+	} catch (error) {
+		console.error(error.message);
 		process.exit(1);
-	});
+	}
+})();
